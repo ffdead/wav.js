@@ -20,10 +20,10 @@ Read format header:
 
 Slice file into a smaller wav chunk:
 
-    // returns the first 30 seconds 
+    // slice out the first 30 seconds 
     wavFile.slice(0, 30, success); 
 
-    // returns a 60 second chunk, starting 30 seconds in
+    // slice out a 60 second chunk, starting 30 seconds in
     wavFile.slice(30, 60, success); 
 
 The success callback is passed the resulting slice as an ArrayBuffer - this buffer represents a new WAVE file of the slice (with WAVE headers).
