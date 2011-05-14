@@ -36,10 +36,13 @@ Example
 Requirements
 -----
 Reading binary files in Javascript requires support for the FileAPI and Typed Arrays. was.js uses File, Blob, FileReader, BlobBuilder, ArrayBuffer. 
+
 http://dev.w3.org/2006/webapi/FileAPI/
+
 http://www.khronos.org/registry/typedarray/specs/latest/
 
 Limitations
 -----
-wav.js only supports the Canonical Wave format for now: http://www.lightlink.com/tjweber/StripWav/Canon.html
-This assumes that the sample data chunk starts directly after the file header.
+wav.js only supports the Canonical Wave format for now, which assumes that the sample data chunk starts directly after the file header.
+
+http://www.lightlink.com/tjweber/StripWav/Canon.html
