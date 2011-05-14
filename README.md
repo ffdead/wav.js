@@ -31,7 +31,7 @@ The success callback is passed the resulting slice as an ArrayBuffer - this buff
 Example
 -----
 
-* Read format of file: http://jsbin.com/ffdead-audio-wav/231/
+* Read format of file: http://jsbin.com/ffdead-audio-wav/241
 
 Requirements
 -----
