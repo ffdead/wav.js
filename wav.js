@@ -1,6 +1,6 @@
-/**
+/*
 
-wav.js
+wav.js - a javascript audiolib for reading WAVE files
 
 Reads the Format chunk of a WAVE file using the RIFF specification.
 
@@ -38,15 +38,15 @@ function wav(file) {
   this.buffer        = undefined;
   
   // format
-  this.chunkID       = undefined;
-  this.chunkSize     = undefined;
-  this.format        = undefined;
-  this.compression   = undefined;
-  this.numChannels   = undefined;
-  this.sampleRate    = undefined;
-  this.byteRate      = undefined;
-  this.blockAlign    = undefined;
-  this.bitsPerSample = undefined;
+  this.chunkID       = undefined; // must be RIFF
+  this.chunkSize     = undefined; // size of file after this field
+  this.format        = undefined; // must be WAVE
+  this.compression   = undefined; // 1=PCM
+  this.numChannels   = undefined; // Mono = 1, Stereo = 2
+  this.sampleRate    = undefined; // 8000, 44100, etc.
+  this.byteRate      = undefined; // bytes per second
+  this.blockAlign    = undefined; // number of bytes for one sample including all channels.
+  this.bitsPerSample = undefined; // 8 bits = 8, 16 bits = 16, etc.
   
   // data chunk
   this.dataOffset    = -1; // index of data block
@@ -97,17 +97,17 @@ wav.prototype.parseHeader = function () {
   this.format        = this.readText(8, 4);
   if (this.format !== 'WAVE') throw 'NOT_SUPPORTED_FORMAT';
   
-  this.compression   = this.readDecimal(20, 2); //1=PCM
-  this.numChannels   = this.readDecimal(22, 2); //Mono = 1, Stereo = 2, etc.
-  this.sampleRate    = this.readDecimal(24, 4); // 8000, 44100, etc.
+  this.compression   = this.readDecimal(20, 2); 
+  this.numChannels   = this.readDecimal(22, 2); 
+  this.sampleRate    = this.readDecimal(24, 4); 
 
   // == SampleRate * NumChannels * BitsPerSample/8
-  this.byteRate      = this.readDecimal(28, 4); // bytes per second
+  this.byteRate      = this.readDecimal(28, 4); 
   
-  // The number of bytes for one sample including all channels.
-  this.blockAlign    = this.readDecimal(32, 2); // == NumChannels * BitsPerSample/8
-  this.bitsPerSample = this.readDecimal(34, 2); //8 bits = 8, 16 bits = 16, etc.
-  
+  // == NumChannels * BitsPerSample/8
+  this.blockAlign    = this.readDecimal(32, 2); 
+
+  this.bitsPerSample = this.readDecimal(34, 2);
 };
 
 /**
@@ -118,14 +118,14 @@ wav.prototype.parseData = function () {
   var chunkType = this.readText(36, 4);
   var chunkSize = this.readDecimal(40, 4);
   
-  // only support files where data chunk is first
+  // only support files where data chunk is first (canonical format)
   if (chunkType === 'data') {
     this.dataLength = chunkSize;
     this.dataOffset = 44;
   }
   else {
-    // duration will not be calculated
-    //throw 'unsupported ' + chunkType + ' chunk - was expecting data';
+    // duration cant be calculated && slice will not work
+    throw 'NOT_CANONICAL_FORMAT: unsupported "' + chunkType + '"" chunk - was expecting data';
   }
 };
 
@@ -141,13 +141,14 @@ wav.prototype.slice = function (start, length, callback) {
   var reader = new FileReader();
   var that = this;
   
-  // only load the first 44 bytes of the header
+  // use the byterate to calculate number of bytes per second
   var start = this.dataOffset + (start * this.byteRate);
   var end = start + (length * this.byteRate);
   
   var headerBlob = this.sliceFile(0, 44);
   var dataBlob = this.sliceFile(start, end);
   
+  // concant header and data slice
   var BlobBuilder = BlobBuilder || WebKitBlobBuilder;
   var bb = new BlobBuilder();
   bb.append(headerBlob);
@@ -156,11 +157,10 @@ wav.prototype.slice = function (start, length, callback) {
   reader.readAsArrayBuffer(bb.getBlob()); 
   reader.onloadend = function() {  
     
-    var header = new Uint8Array(this.result, 0, 44);
-    // TODO update chunkSize in header
-    // TODO update dataChunkSize in header
-    // header[0] = 'new size in litle endian bytes';
-    
+    // TODO update chunkSize in header     - slices seem to be playable without updating this?
+    // TODO update dataChunkSize in header - slices seem to be playable without updating this?
+    // var header = new Uint8Array(this.result, 0, 44);
+    // header[0] = 'new size in litle endian bytes';   
     if (callback) callback.apply(that, [this.result]);
   };
 };
