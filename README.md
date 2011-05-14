@@ -28,12 +28,16 @@ Usage:
 
 The success callback is passed the resulting slice as an ArrayBuffer - this buffer represents a new WAVE file of the slice (with WAVE headers).
 
-
 Example
 -----
 
 * Read format of file: http://jsbin.com/ffdead-audio-wav/231/
 
+Requirements
+-----
+Reading binary files in Javascript requires support for the FileAPI and Typed Arrays. was.js uses File, Blob, FileReader, BlobBuilder, ArrayBuffer. 
+http://dev.w3.org/2006/webapi/FileAPI/
+http://www.khronos.org/registry/typedarray/specs/latest/
 
 Limitations
 -----
