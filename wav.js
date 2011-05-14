@@ -28,10 +28,12 @@ NOTE: Does not auto-correct:
 function wav(file) {
   
   // status
-  this.EMPTY      = 0; //  No data has been loaded yet.
-  this.LOADING    = 1; // Data is currently being loaded.
-  this.DONE       = 2; // The entire read request has been completed.
-  this.readyState = this.EMPTY;
+  this.EMPTY              = 0; //  No data has been loaded yet.
+  this.LOADING            = 1; // Data is currently being loaded.
+  this.DONE               = 2; // The entire read request has been completed.
+  this.UNSUPPORTED_FORMAT = 3; // Error state - file format not recognized
+  this.readyState         = this.EMPTY;
+  this.error              = undefined;
   
   // original File and loaded ArrayBuffer
   this.file          = file;
@@ -72,10 +74,17 @@ wav.prototype.peek = function () {
   
   reader.onloadend = function() {  
     that.buffer = this.result;
-    that.parseHeader();
-    that.parseData();
-    that.readyState = that.DONE;
-    
+
+    try {
+      that.parseHeader();
+      that.parseData();
+      that.readyState = that.DONE;
+    }
+    catch (e) {
+      that.readyState = that.UNSUPPORTED_FORMAT;
+      that.error      = e;
+    } 
+       
     // trigger onloadend callback if exists
     if (that.onloadend) {
       that.onloadend.apply(that);
