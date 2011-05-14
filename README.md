@@ -7,10 +7,10 @@ wav.js is a javascript library to parse headers of WAVE files following the RIFF
 
 It also supports slicing uncompressed PCM files into smaller files - which can be handy if you don't want to load the whole file into memory to play just a small chunk.
 
-Usage:
+Usage
 ----
 
-* Read format header
+Read format header:
 
     var wavFile = new wave(in Blob blob);
     wavFile.onloadend = function () {
@@ -18,7 +18,7 @@ Usage:
         console.log(this);
     }; 
 
-* Slice file into a smaller wav chunk
+Slice file into a smaller wav chunk:
 
     // returns the first 30 seconds 
     wavFile.slice(0, 30, success); 
