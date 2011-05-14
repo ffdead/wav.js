@@ -1,4 +1,4 @@
-wav.js
+wav.js - a javascript lib for reading WAVE files
 ======
 
 Description
