@@ -12,7 +12,7 @@ Usage
 
 Read format header:
 
-    var wavFile = new wave(in Blob blob);
+    var wavFile = new wav(in Blob blob);
     wavFile.onloadend = function () {
         // 'this' refers to the wav instance
         console.log(this);
