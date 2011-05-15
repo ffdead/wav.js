@@ -276,7 +276,7 @@ wav.prototype.getDuration = function () {
  * Override toString
  */
 wav.prototype.toString = function () {
-  return this.file ? this.file.name : 'noname.wav' + ' (' + this.chunkID + '/' + this.format + ')\n' +
+  return (this.file ? this.file.name : 'noname.wav') + ' (' + this.chunkID + '/' + this.format + ')\n' +
     'Compression: ' + (this.isCompressed() ? 'yes' : 'no (PCM)') + '\n' +
     'Number of channels: ' + this.numChannels + ' (' + (this.isStereo()?'stereo':'mono') + ')\n' +
     'Sample rate: ' + this.sampleRate + ' Hz\n'+
