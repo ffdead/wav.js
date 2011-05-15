@@ -12,7 +12,7 @@ Usage
 
 Read format header:
 
-    var wavFile = new wave(in Blob blob);
+    var wavFile = new wav(in Blob blob);
     wavFile.onloadend = function () {
         // 'this' refers to the wav instance
         console.log(this);
@@ -31,7 +31,7 @@ The success callback is passed the resulting slice as an ArrayBuffer - this buff
 Example
 -----
 
-* Read format of file: http://jsbin.com/ffdead-audio-wav/231/
+* Read format of file: http://jsbin.com/ffdead-audio-wav/241
 
 Requirements
 -----
