@@ -23,10 +23,10 @@ NOTE: Does not auto-correct:
  * 
  * Fires onloadend() function after successful load.
  *
- * @param {File|Blob} RIFF formatted WAV file
+ * @param {File|Blob|ArrayBuffer} RIFF formatted WAV file
  */
 function wav(file) {
-  
+
   // status
   this.EMPTY              = 0; //  No data has been loaded yet.
   this.LOADING            = 1; // Data is currently being loaded.
@@ -36,8 +36,8 @@ function wav(file) {
   this.error              = undefined;
   
   // original File and loaded ArrayBuffer
-  this.file          = file;
-  this.buffer        = undefined;
+  this.file          = file instanceof Blob ? file : undefined;
+  this.buffer        = file instanceof ArrayBuffer ? file : undefined;;
   
   // format
   this.chunkID       = undefined; // must be RIFF
@@ -64,6 +64,11 @@ function wav(file) {
 wav.prototype.peek = function () {
   
   this.readyState = this.LOADING;
+
+  // see if buffer is already loaded
+  if (this.buffer !== undefined) {
+    return this.parseArrayBuffer();
+  }
   
   var reader = new FileReader();
   var that = this;
@@ -74,22 +79,25 @@ wav.prototype.peek = function () {
   
   reader.onloadend = function() {  
     that.buffer = this.result;
-
-    try {
-      that.parseHeader();
-      that.parseData();
-      that.readyState = that.DONE;
-    }
-    catch (e) {
-      that.readyState = that.UNSUPPORTED_FORMAT;
-      that.error      = e;
-    } 
-       
-    // trigger onloadend callback if exists
-    if (that.onloadend) {
-      that.onloadend.apply(that);
-    }
+    that.parseArrayBuffer.apply(that);
   };
+};
+
+wav.prototype.parseArrayBuffer = function () {
+  try {
+    this.parseHeader();
+    this.parseData();
+    this.readyState = this.DONE;
+  }
+  catch (e) {
+    this.readyState = this.UNSUPPORTED_FORMAT;
+    this.error      = e;
+  } 
+     
+  // trigger onloadend callback if exists
+  if (this.onloadend) {
+    this.onloadend.apply(this);
+  }
 };
   
 /**
@@ -166,15 +174,17 @@ wav.prototype.slice = function (start, length, callback) {
   reader.readAsArrayBuffer(bb.getBlob()); 
   reader.onloadend = function() {  
     
-    // TODO update chunkSize in header     - slices seem to be playable without updating this?
-    // TODO update dataChunkSize in header - slices seem to be playable without updating this?
-    // var header = new Uint8Array(this.result, 0, 44);
-    // header[0] = 'new size in litle endian bytes';   
+    // update chunkSize in header
+    var chunkSize = new Uint8Array(this.result, 4, 4);
+    that.tolittleEndianDecBytes(chunkSize, 36+dataBlob.size);
+
+    // update dataChunkSize in header
+    var dataChunkSize = new Uint8Array(this.result, 40, 4);
+    that.tolittleEndianDecBytes(dataChunkSize, dataBlob.size);
+
     if (callback) callback.apply(that, [this.result]);
   };
 };
-
-  
 
 /*
  * do we need direct access to  samples?
@@ -188,8 +198,6 @@ wav.prototype.getSamples = function () {
     this.dataSamples = new Int16Array(this.buffer, 44, chunkSize/this.blockAlign);
 }
 */
-
-
 
 /**
  * Reads slice from buffer as String
@@ -208,18 +216,33 @@ wav.prototype.readText = function (start, length) {
  */
 wav.prototype.readDecimal = function (start, length) {
   var a = new Uint8Array(this.buffer, start, length);
-  return this.littleEndianDecimal(a);
+  return this.fromLittleEndianDecBytes(a);
 };
 
 /**
- * Calculates decimal value from Little-endian byte array
+ * Calculates decimal value from Little-endian decimal byte array
  */
-wav.prototype.littleEndianDecimal = function (a) {
+wav.prototype.fromLittleEndianDecBytes = function (a) {
   var sum = 0;
   for(var i = 0; i < a.length; i++) {
     sum += a[i]*Math.pow(256, i);
   }
   return sum;
+};
+
+/**
+ * Populate Little-endian decimal byte array from decimal value
+ */
+wav.prototype.tolittleEndianDecBytes = function (a, decimalVal) {
+  var rem = decimalVal;
+  for(var i = a.length-1; i >= 0; i--) {
+    //XXX this smells - bitshift ninjas wanted
+    var mult = Math.pow(256, i);
+    var val = Math.floor(rem /mult)
+    rem = rem - (val*mult);
+    a[i] = val;
+  }
+  return a;
 };
 
 
@@ -253,7 +276,7 @@ wav.prototype.getDuration = function () {
  * Override toString
  */
 wav.prototype.toString = function () {
-  return this.file.name + ' (' + this.chunkID + '/' + this.format + ')\n' +
+  return this.file ? this.file.name : 'noname.wav' + ' (' + this.chunkID + '/' + this.format + ')\n' +
     'Compression: ' + (this.isCompressed() ? 'yes' : 'no (PCM)') + '\n' +
     'Number of channels: ' + this.numChannels + ' (' + (this.isStereo()?'stereo':'mono') + ')\n' +
     'Sample rate: ' + this.sampleRate + ' Hz\n'+
