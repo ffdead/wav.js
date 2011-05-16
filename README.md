@@ -32,6 +32,7 @@ Example
 -----
 
 * Read format of file: http://jsbin.com/ffdead-audio-wav/241
+* Slice file into smaller wavs: http://jsbin.com/ffdead-audio-wav-slice/233
 
 Requirements
 -----
