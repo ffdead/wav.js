@@ -224,9 +224,8 @@ wav.prototype.readDecimal = function (start, length) {
  */
 wav.prototype.fromLittleEndianDecBytes = function (a) {
   var sum = 0;
-  for(var i = 0; i < a.length; i++) {
-    sum += a[i]*Math.pow(256, i);
-  }
+  for(var i = 0; i < a.length; i++)
+    sum |= a[i] << (i*8);
   return sum;
 };
 
@@ -234,13 +233,9 @@ wav.prototype.fromLittleEndianDecBytes = function (a) {
  * Populate Little-endian decimal byte array from decimal value
  */
 wav.prototype.tolittleEndianDecBytes = function (a, decimalVal) {
-  var rem = decimalVal;
-  for(var i = a.length-1; i >= 0; i--) {
-    //XXX this smells - bitshift ninjas wanted
-    var mult = Math.pow(256, i);
-    var val = Math.floor(rem /mult)
-    rem = rem - (val*mult);
-    a[i] = val;
+  for(var i=0; i<a.length; i++) {
+    a[i] = decimalVal & 0xFF;
+    decimalVal >>= 8;
   }
   return a;
 };
