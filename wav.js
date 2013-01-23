@@ -164,14 +164,11 @@ wav.prototype.slice = function (start, length, callback) {
   
   var headerBlob = this.sliceFile(0, 44);
   var dataBlob = this.sliceFile(start, end);
-  
+
   // concant header and data slice
-  var BlobBuilder = BlobBuilder || WebKitBlobBuilder;
-  var bb = new BlobBuilder();
-  bb.append(headerBlob);
-  bb.append(dataBlob);
-  
-  reader.readAsArrayBuffer(bb.getBlob()); 
+  var blob = new Blob([headerBlob, dataBlob]);
+
+  reader.readAsArrayBuffer(blob);
   reader.onloadend = function() {  
     
     // update chunkSize in header
