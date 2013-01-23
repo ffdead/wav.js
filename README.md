@@ -36,7 +36,7 @@ Example
 
 Requirements
 -----
-Reading binary files in Javascript requires support for the FileAPI and Typed Arrays. was.js uses File, Blob, FileReader, BlobBuilder, ArrayBuffer. 
+Reading binary files in Javascript requires support for the FileAPI and Typed Arrays. was.js uses File, Blob, FileReader, ArrayBuffer. 
 
 http://dev.w3.org/2006/webapi/FileAPI/
 
