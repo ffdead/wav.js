@@ -15,6 +15,9 @@ NOTE: Does not auto-correct:
 @author  David Lindkvist
 @twitter ffdead
 
+@author Thatcher Chamberlin
+Added code for the getSamples function
+
 */
 
 
@@ -38,6 +41,8 @@ function wav(file) {
   // original File and loaded ArrayBuffer
   this.file          = file instanceof Blob ? file : undefined;
   this.buffer        = file instanceof ArrayBuffer ? file : undefined;;
+  
+  this.dataBuffer	 = file instanceof ArrayBuffer ? file : undefined;;
   
   // format
   this.chunkID       = undefined; // must be RIFF
@@ -75,7 +80,7 @@ wav.prototype.peek = function () {
   
   // only load the first 44 bytes of the header
   var headerBlob = this.sliceFile(0, 44);
-  reader.readAsArrayBuffer(headerBlob);
+  reader.readAsArrayBuffer(this.file);
   
   reader.onloadend = function() {  
     that.buffer = this.result;
@@ -87,6 +92,7 @@ wav.prototype.parseArrayBuffer = function () {
   try {
     this.parseHeader();
     this.parseData();
+    this.getSamples();
     this.readyState = this.DONE;
   }
   catch (e) {
@@ -185,16 +191,16 @@ wav.prototype.slice = function (start, length, callback) {
 
 /*
  * do we need direct access to  samples?
- *
+ * Yes, definitely
+ * Samples can be accessed from the dataSamples variable
+ */
 wav.prototype.getSamples = function () {
-
-  // TODO load data chunk into buffer
+  
   if (this.bitsPerSample === 8)
-    this.dataSamples = new Uint8Array(this.buffer, 44, chunkSize/this.blockAlign);
+    this.dataSamples = new Uint8Array(this.buffer, 44, this.dataLength/this.blockAlign);
   else if (this.bitsPerSample === 16)
-    this.dataSamples = new Int16Array(this.buffer, 44, chunkSize/this.blockAlign);
+    this.dataSamples = new Int16Array(this.buffer, 44, this.dataLength/this.blockAlign);
 }
-*/
 
 /**
  * Reads slice from buffer as String
