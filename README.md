@@ -35,6 +35,8 @@ Read samples from a wav file:
     var wavFile = new wav(file);
     
     wavFile.onloadend = function () {
+        //Load all samples
+        wavFile.getSamples();
         //Print out all the samples
         console.log(wavFile.dataSamples);
     };

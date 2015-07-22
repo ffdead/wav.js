@@ -92,7 +92,6 @@ wav.prototype.parseArrayBuffer = function () {
   try {
     this.parseHeader();
     this.parseData();
-    this.getSamples();
     this.readyState = this.DONE;
   }
   catch (e) {
