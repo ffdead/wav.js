@@ -28,6 +28,20 @@ Slice file into a smaller wav chunk:
 
 The success callback is passed the resulting slice as an ArrayBuffer - this buffer represents a new WAVE file of the slice (with WAVE headers).
 
+Read samples from a wav file:
+
+    var fileInput = document.getElementById('fileInput');
+    var file = fileInput.files[0];
+    var wavFile = new wav(file);
+    
+    wavFile.onloadend = function () {
+        //Load all samples
+        wavFile.getSamples();
+        //Print out all the samples
+        console.log(wavFile.dataSamples);
+    };
+
+
 Example
 -----
 
